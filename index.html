@@ -1,5 +1,145 @@
-<h3>Café Achtergrondruis</h3>
-<audio controls loop>
-  <source src="jouw-cafe-geluid.mp3" type="audio/mpeg">
-  Je browser ondersteunt dit audio-element niet.
-</audio>
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Café Geluiden</title>
+  <style>
+    body {
+      background-color: #f5f5dc; /* Beige achtergrond */
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    #timer-container {
+      position: absolute;
+      top: 20px;
+      z-index: 10;
+      background: rgba(255, 255, 255, 0.7);
+      padding: 15px 25px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    #leaves-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none; /* Klikken gaat door de animatie heen */
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="timer-container">
+    <h2>Herfst Timer</h2>
+    <div id="timer" style="font-size: 2rem; font-weight: bold;">05:00</div>
+  </div>
+
+  <canvas id="leaves-canvas"></canvas>
+
+  <script>
+    const canvas = document.getElementById('leaves-canvas');
+    const ctx = canvas.getContext('2d');
+
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
+
+    // Timer instellingen (bijv. 300 seconden = 5 minuten)
+    const TOTAL_TIME = 300; 
+    let timeRemaining = TOTAL_TIME;
+
+    const timerElement = document.getElementById('timer');
+
+    // Bladeren logica
+    const leaves = [];
+    const MAX_LEAVES = 100;
+    let pileHeight = 0;
+
+    for (let i = 0; i < MAX_LEAVES; i++) {
+      leaves.push({
+        x: Math.random() * width,
+        y: Math.random() * height - height,
+        size: Math.random() * 12 + 8,
+        speedY: Math.random() * 1.5 + 0.8,
+        speedX: Math.sin(Math.random() * Math.PI) * 1,
+        angle: Math.random() * 360,
+        spin: (Math.random() - 0.5) * 2,
+        color: ['#d8572a', '#e88a1a', '#c0392b', '#f39c12'][Math.floor(Math.random() * 4)]
+      });
+    }
+
+    function drawLeaf(x, y, size, angle, color) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate((angle * Math.PI) / 180);
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(0, 0, size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function update() {
+      ctx.clearRect(0, 0, width, height);
+
+      // Bereken hoe hoog de stapel moet zijn op basis van de timer
+      const progress = 1 - (timeRemaining / TOTAL_TIME);
+      pileHeight = progress * height;
+
+      // Teken de opbouwende laag bladeren onderaan
+      ctx.fillStyle = '#c0392b';
+      ctx.fillRect(0, height - pileHeight, width, pileHeight);
+
+      // Teken en verplaats vallende bladeren
+      leaves.forEach(leaf => {
+        if (timeRemaining > 0) {
+          leaf.y += leaf.speedY;
+          leaf.x += Math.sin(leaf.y / 30) * 1.5;
+          leaf.angle += leaf.spin;
+
+          // Als blad de opgebouwde stapel raakt, opnieuw bovenaan beginnen
+          if (leaf.y >= height - pileHeight) {
+            leaf.y = -20;
+            leaf.x = Math.random() * width;
+          }
+        }
+        drawLeaf(leaf.x, leaf.y, leaf.size, leaf.angle, leaf.color);
+      });
+
+      requestAnimationFrame(update);
+    }
+
+    // Timer countdown
+    const countdown = setInterval(() => {
+      if (timeRemaining > 0) {
+        timeRemaining--;
+        const mins = Math.floor(timeRemaining / 60).toString().padStart(2, '0');
+        const secs = (timeRemaining % 60).toString().padStart(2, '0');
+        timerElement.textContent = `${mins}:${secs}`;
+      } else {
+        clearInterval(countdown);
+        timerElement.textContent = "Tijd is om!";
+      }
+    }, 1000);
+
+    update();
+  </script>
+</body>
+</html>
