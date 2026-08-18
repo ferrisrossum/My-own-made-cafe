@@ -130,7 +130,7 @@
 
     /* Rechts: Geluidsmixer (Transparante achtergrond) */
     .mixer-container {
-      background: transparent; /* Volledig transparant */
+      background: transparent;
       border: none;
       box-shadow: none;
       padding: 0 5px;
@@ -139,7 +139,6 @@
       overflow-y: auto;
     }
 
-    /* Subtiele/onzichtbare scrollbar als het scherm erg klein is */
     .mixer-container::-webkit-scrollbar {
       width: 4px;
     }
@@ -525,7 +524,7 @@
       height = canvas.height = window.innerHeight;
     });
 
-    const leafColors = ['#d8572a', '#e88a1a', '#c0392b', '#f39c12', '#a04000', '#7e5109'];
+    const leafColors = ['#d8572a', '#e88a1a', '#c0392b', '#f39c12', '#a04000', '#7e5109', '#b33e10', '#8c3511'];
     const leaves = [];
     const MAX_LEAVES = 70;
 
@@ -542,14 +541,17 @@
       });
     }
 
+    // Zeer dichte verzameling van 1000 bladeren voor de stapel onderin
     const pileLeaves = [];
-    for (let i = 0; i < 250; i++) {
+    const PILE_LEAF_COUNT = 1000;
+    for (let i = 0; i < PILE_LEAF_COUNT; i++) {
       pileLeaves.push({
         xRel: Math.random(),
-        yRel: Math.random(),
-        size: Math.random() * 16 + 12,
+        yRel: Math.pow(Math.random(), 0.85),
+        size: Math.random() * 18 + 12,
         angle: Math.random() * 360,
-        color: leafColors[Math.floor(Math.random() * leafColors.length)]
+        color: leafColors[Math.floor(Math.random() * leafColors.length)],
+        type: Math.floor(Math.random() * 2)
       });
     }
 
@@ -569,6 +571,15 @@
       }
       
       ctx.fill();
+
+      // Subtiele bladnerven voor realistischere textuur
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.12)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(-size / 2, 0);
+      ctx.lineTo(size / 2, 0);
+      ctx.stroke();
+
       ctx.restore();
     }
 
@@ -580,14 +591,23 @@
 
       leafCountElement.textContent = Math.round(progress * 100);
 
+      // Teken de stapel bladeren onderin
       if (pileHeight > 0) {
+        // 1. Dekkende warme onderlaag om te zorgen dat de achtergrond 0% doorschijnt
+        ctx.fillStyle = '#5c270e';
+        ctx.beginPath();
+        ctx.rect(0, height - pileHeight + 15, width, pileHeight);
+        ctx.fill();
+
+        // 2. Honderden losse bladeren eroverheen voor textuur en vorm
         pileLeaves.forEach(pLeaf => {
           const px = pLeaf.xRel * width;
           const py = height - (pLeaf.yRel * pileHeight);
-          drawLeaf(px, py, pLeaf.size, pLeaf.angle, pLeaf.color, 0);
+          drawLeaf(px, py, pLeaf.size, pLeaf.angle, pLeaf.color, pLeaf.type);
         });
       }
 
+      // Vallende bladeren
       leaves.forEach(leaf => {
         if (isRunning && timeRemaining > 0) {
           leaf.y += leaf.speedY;
