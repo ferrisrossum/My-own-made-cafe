@@ -22,7 +22,7 @@
       color: #3d2314;
     }
 
-    /* Canvas voor de vallende en opstapelende bladeren */
+    /* Canvas voor animatie */
     #leaves-canvas {
       position: absolute;
       top: 0;
@@ -36,61 +36,101 @@
     /* Centraal Timer Blok */
     .timer-card {
       position: absolute;
-      top: 40px;
+      top: 30px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 10;
-      background: rgba(255, 248, 240, 0.55);
+      background: rgba(255, 248, 240, 0.65);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.6);
-      padding: 20px 45px;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      padding: 20px 40px;
       border-radius: 24px;
       text-align: center;
-      box-shadow: 0 10px 30px rgba(61, 35, 20, 0.08);
+      box-shadow: 0 10px 30px rgba(61, 35, 20, 0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
     }
 
     .timer-display {
-      font-size: 4.5rem;
+      font-size: 4rem;
       font-weight: 700;
       letter-spacing: 2px;
       line-height: 1;
-      margin-bottom: 8px;
     }
 
-    .timer-label {
-      font-size: 1.1rem;
-      font-weight: 500;
-      opacity: 0.85;
-    }
-
-    .timer-subtext {
-      font-size: 0.85rem;
-      opacity: 0.65;
+    /* Timer Controls */
+    .timer-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
       margin-top: 4px;
+    }
+
+    .timer-input {
+      width: 60px;
+      padding: 6px 8px;
+      border-radius: 10px;
+      border: 1px solid #c09f80;
+      background: rgba(255, 255, 255, 0.8);
+      font-size: 0.95rem;
+      text-align: center;
+      font-weight: bold;
+      color: #3d2314;
+    }
+
+    .btn {
+      background: #8c4320;
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn:hover {
+      background: #703317;
+    }
+
+    .btn:active {
+      transform: scale(0.95);
+    }
+
+    .btn-secondary {
+      background: rgba(61, 35, 20, 0.15);
+      color: #3d2314;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(61, 35, 20, 0.25);
     }
 
     /* Geluidsspeler Paneel Links onderin */
     .sound-panel {
       position: absolute;
-      bottom: 40px;
-      left: 40px;
+      bottom: 30px;
+      left: 30px;
       z-index: 10;
-      background: rgba(255, 248, 240, 0.55);
+      background: rgba(255, 248, 240, 0.65);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.6);
-      padding: 24px;
-      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      padding: 20px 24px;
+      border-radius: 20px;
       width: 320px;
-      box-shadow: 0 10px 30px rgba(61, 35, 20, 0.08);
+      box-shadow: 0 10px 30px rgba(61, 35, 20, 0.1);
     }
 
     .sound-track {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 18px;
+      margin-bottom: 14px;
     }
 
     .sound-track:last-child {
@@ -100,19 +140,15 @@
     .track-info {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       font-weight: 600;
-      font-size: 1rem;
-      width: 130px;
-    }
-
-    .track-icon {
-      font-size: 1.3rem;
+      font-size: 0.95rem;
+      width: 140px;
     }
 
     .volume-slider {
       flex-grow: 1;
-      margin: 0 12px;
+      margin: 0 10px;
       accent-color: #8c4320;
       cursor: pointer;
     }
@@ -120,42 +156,25 @@
     .play-btn {
       background: none;
       border: none;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       cursor: pointer;
       color: #3d2314;
-      transition: transform 0.1s ease;
+      width: 25px;
     }
 
-    .play-btn:active {
-      transform: scale(0.9);
-    }
-
-    /* Status Bar onderin rechts */
+    /* Status Bar Rechts onderin */
     .status-bar {
       position: absolute;
       bottom: 25px;
-      right: 40px;
+      right: 30px;
       z-index: 10;
       font-size: 0.9rem;
       font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    /* Footer onderin midden */
-    .footer-info {
-      position: absolute;
-      bottom: 15px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 10;
-      background: rgba(255, 248, 240, 0.5);
-      padding: 8px 20px;
-      border-radius: 12px;
-      font-size: 0.8rem;
-      text-align: center;
-      opacity: 0.8;
+      background: rgba(255, 248, 240, 0.65);
+      backdrop-filter: blur(12px);
+      padding: 10px 18px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.7);
     }
   </style>
 </head>
@@ -164,15 +183,20 @@
   <!-- Timer Card -->
   <div class="timer-card">
     <div class="timer-display" id="timer">05:00</div>
-    <div class="timer-label">Tijd over</div>
-    <div class="timer-subtext">Bladeren stapel voortgang</div>
+    
+    <div class="timer-controls">
+      <input type="number" id="minutes-input" class="timer-input" min="1" max="120" value="5">
+      <span style="font-size: 0.85rem; font-weight: 600;">min</span>
+      <button class="btn" id="start-btn">Start</button>
+      <button class="btn btn-secondary" id="reset-btn">Reset</button>
+    </div>
   </div>
 
   <!-- Sound Mixer -->
   <div class="sound-panel">
     <div class="sound-track">
       <div class="track-info">
-        <span class="track-icon">👥</span>
+        <span>👥</span>
         <span>Geroezemoes</span>
       </div>
       <input type="range" class="volume-slider" min="0" max="100" value="70">
@@ -181,7 +205,7 @@
 
     <div class="sound-track">
       <div class="track-info">
-        <span class="track-icon">☕</span>
+        <span>☕</span>
         <span>Koffieapparaat</span>
       </div>
       <input type="range" class="volume-slider" min="0" max="100" value="40">
@@ -190,7 +214,7 @@
 
     <div class="sound-track">
       <div class="track-info">
-        <span class="track-icon">🌧</span>
+        <span>🌧</span>
         <span>Regen</span>
       </div>
       <input type="range" class="volume-slider" min="0" max="100" value="60">
@@ -198,20 +222,12 @@
     </div>
   </div>
 
-  <!-- Footer Info -->
-  <div class="footer-info">
-    Mijn Website: Live - Verbeterd door AI<br>
-    Achtergrond: Herfstbladeren Animatie
-  </div>
-
   <!-- Status Bar -->
   <div class="status-bar">
-    <span>Bladeren op stapel: <span id="leaf-count">0</span>%</span>
-    <span>🍂 Vol</span>
-    <input type="range" class="volume-slider" style="width: 80px;" min="0" max="100" value="100">
+    🍂 Stapel vol: <span id="leaf-count">0</span>%
   </div>
 
-  <!-- Canvas voor Animatie -->
+  <!-- Canvas -->
   <canvas id="leaves-canvas"></canvas>
 
   <script>
@@ -226,14 +242,64 @@
       height = canvas.height = window.innerHeight;
     });
 
-    // 5 Minuten Timer (300 seconden)
-    const TOTAL_TIME = 300;
-    let timeRemaining = TOTAL_TIME;
+    // Timer Variabelen
+    let totalTime = 300; // Standaard 5 minuten
+    let timeRemaining = totalTime;
+    let timerInterval = null;
+    let isRunning = false;
 
     const timerElement = document.getElementById('timer');
+    const minutesInput = document.getElementById('minutes-input');
+    const startBtn = document.getElementById('start-btn');
+    const resetBtn = document.getElementById('reset-btn');
     const leafCountElement = document.getElementById('leaf-count');
 
-    // Bladeren & Kleuren
+    function updateTimerDisplay() {
+      const mins = Math.floor(timeRemaining / 60).toString().padStart(2, '0');
+      const secs = (timeRemaining % 60).toString().padStart(2, '0');
+      timerElement.textContent = `${mins}:${secs}`;
+    }
+
+    function startTimer() {
+      if (isRunning) {
+        clearInterval(timerInterval);
+        isRunning = false;
+        startBtn.textContent = 'Start';
+        return;
+      }
+
+      if (timeRemaining <= 0) resetTimer();
+
+      isRunning = true;
+      startBtn.textContent = 'Pauze';
+
+      timerInterval = setInterval(() => {
+        if (timeRemaining > 0) {
+          timeRemaining--;
+          updateTimerDisplay();
+        } else {
+          clearInterval(timerInterval);
+          isRunning = false;
+          startBtn.textContent = 'Start';
+        }
+      }, 1000);
+    }
+
+    function resetTimer() {
+      clearInterval(timerInterval);
+      isRunning = false;
+      startBtn.textContent = 'Start';
+      const inputMins = parseInt(minutesInput.value) || 5;
+      totalTime = Math.max(1, inputMins) * 60;
+      timeRemaining = totalTime;
+      updateTimerDisplay();
+    }
+
+    startBtn.addEventListener('click', startTimer);
+    resetBtn.addEventListener('click', resetTimer);
+    minutesInput.addEventListener('change', resetTimer);
+
+    // Bladeren Animatie Logica
     const leafColors = ['#d8572a', '#e88a1a', '#c0392b', '#f39c12', '#a04000', '#7e5109'];
     const leaves = [];
     const MAX_LEAVES = 80;
@@ -244,20 +310,18 @@
         y: Math.random() * height - height,
         size: Math.random() * 14 + 10,
         speedY: Math.random() * 1.5 + 0.8,
-        speedX: Math.sin(Math.random() * Math.PI) * 1,
         angle: Math.random() * 360,
         spin: (Math.random() - 0.5) * 2.5,
         color: leafColors[Math.floor(Math.random() * leafColors.length)],
-        type: Math.floor(Math.random() * 2) // Verschillende blaadjesvormen
+        type: Math.floor(Math.random() * 2)
       });
     }
 
-    // Vaste stapel bladeren onderin
     const pileLeaves = [];
     for (let i = 0; i < 300; i++) {
       pileLeaves.push({
-        xRel: Math.random(), // Relatieve X positie (0 - 1)
-        yRel: Math.random(), // Relatieve hoogte binnen de stapel
+        xRel: Math.random(),
+        yRel: Math.random(),
         size: Math.random() * 16 + 12,
         angle: Math.random() * 360,
         color: leafColors[Math.floor(Math.random() * leafColors.length)]
@@ -272,12 +336,10 @@
       ctx.beginPath();
       
       if (type === 1) {
-        // Eikenblad-achtige vorm
         ctx.arc(0, 0, size / 2, 0, Math.PI * 2);
         ctx.arc(size / 3, -size / 3, size / 3, 0, Math.PI * 2);
         ctx.arc(-size / 3, -size / 3, size / 3, 0, Math.PI * 2);
       } else {
-        // Standaard blad
         ctx.ellipse(0, 0, size, size / 2, 0, 0, Math.PI * 2);
       }
       
@@ -288,13 +350,12 @@
     function update() {
       ctx.clearRect(0, 0, width, height);
 
-      // Bereken de voortgang van de stapel (0% tot 100%)
-      const progress = 1 - (timeRemaining / TOTAL_TIME);
-      const pileHeight = progress * (height * 0.45); // Maximaal 45% van het scherm gevuld
+      const progress = 1 - (timeRemaining / totalTime);
+      const pileHeight = progress * (height * 0.4);
 
       leafCountElement.textContent = Math.round(progress * 100);
 
-      // Teken de opgebouwde stapel onderin
+      // Teken de stapel onderin
       if (pileHeight > 0) {
         pileLeaves.forEach(pLeaf => {
           const px = pLeaf.xRel * width;
@@ -305,12 +366,11 @@
 
       // Teken en verplaats de vallende bladeren
       leaves.forEach(leaf => {
-        if (timeRemaining > 0) {
+        if (isRunning && timeRemaining > 0) {
           leaf.y += leaf.speedY;
           leaf.x += Math.sin(leaf.y / 25) * 1.2;
           leaf.angle += leaf.spin;
 
-          // Als het blad de opgebouwde stapel onderin raakt
           if (leaf.y >= height - pileHeight) {
             leaf.y = -20;
             leaf.x = Math.random() * width;
@@ -322,19 +382,6 @@
       requestAnimationFrame(update);
     }
 
-    // Timer Aftellen
-    const countdown = setInterval(() => {
-      if (timeRemaining > 0) {
-        timeRemaining--;
-        const mins = Math.floor(timeRemaining / 60).toString().padStart(2, '0');
-        const secs = (timeRemaining % 60).toString().padStart(2, '0');
-        timerElement.textContent = `${mins}:${secs}`;
-      } else {
-        clearInterval(countdown);
-        timerElement.textContent = "00:00";
-      }
-    }, 1000);
-
     // Speel/Pauze knoppen toggle
     document.querySelectorAll('.play-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -342,6 +389,7 @@
       });
     });
 
+    updateTimerDisplay();
     update();
   </script>
 </body>
