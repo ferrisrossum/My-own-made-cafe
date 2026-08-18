@@ -90,7 +90,7 @@
     }
 
     .timer-input {
-      width: 55px;
+      width: 50px;
       padding: 5px;
       border-radius: 8px;
       border: 1px solid #c09f80;
@@ -250,9 +250,11 @@
 
     <!-- Timer Card -->
     <div class="timer-card">
-      <div class="timer-display" id="timer">05:00</div>
+      <div class="timer-display" id="timer">00:00</div>
       <div class="timer-controls">
-        <input type="number" id="minutes-input" class="timer-input" min="1" max="120" value="5">
+        <input type="number" id="hours-input" class="timer-input" min="0" max="24" value="0">
+        <span style="font-size: 0.85rem; font-weight: 600;">uur</span>
+        <input type="number" id="minutes-input" class="timer-input" min="0" max="59" value="5">
         <span style="font-size: 0.85rem; font-weight: 600;">min</span>
         <button class="btn" id="start-btn">Start</button>
         <button class="btn btn-secondary" id="reset-btn">Reset</button>
@@ -276,7 +278,6 @@
       </label>
     </div>
 
-    <!-- Spoor 1: Barista -->
     <div class="sound-track">
       <div class="track-header">
         <span>Barista 👤</span>
@@ -293,7 +294,6 @@
       </div>
     </div>
 
-    <!-- Spoor 2: Preparing Drinks -->
     <div class="sound-track">
       <div class="track-header">
         <span>Preparing Drinks ☕</span>
@@ -310,7 +310,6 @@
       </div>
     </div>
 
-    <!-- Spoor 3: Coffee Cups -->
     <div class="sound-track">
       <div class="track-header">
         <span>Coffee Cups 🍽</span>
@@ -327,7 +326,6 @@
       </div>
     </div>
 
-    <!-- Spoor 4: Other Customers -->
     <div class="sound-track">
       <div class="track-header">
         <span>Other Customers 👥</span>
@@ -344,7 +342,6 @@
       </div>
     </div>
 
-    <!-- Spoor 5: Machinery -->
     <div class="sound-track">
       <div class="track-header">
         <span>Machinery ⚙</span>
@@ -361,7 +358,6 @@
       </div>
     </div>
 
-    <!-- Spoor 6: Rainy Day -->
     <div class="sound-track">
       <div class="track-header">
         <span>Rainy Day 🌧</span>
@@ -378,7 +374,6 @@
       </div>
     </div>
 
-    <!-- Spoor 7: Sunny Day -->
     <div class="sound-track">
       <div class="track-header">
         <span>Sunny Day ☀️</span>
@@ -395,7 +390,6 @@
       </div>
     </div>
 
-    <!-- Spoor 8: Fireplace -->
     <div class="sound-track">
       <div class="track-header">
         <span>Fireplace 🔥</span>
@@ -445,15 +439,23 @@
     let isRunning = false;
 
     const timerElement = document.getElementById('timer');
+    const hoursInput = document.getElementById('hours-input');
     const minutesInput = document.getElementById('minutes-input');
     const startBtn = document.getElementById('start-btn');
     const resetBtn = document.getElementById('reset-btn');
     const leafCountElement = document.getElementById('leaf-count');
 
     function updateTimerDisplay() {
-      const mins = Math.floor(timeRemaining / 60).toString().padStart(2, '0');
+      const hrs = Math.floor(timeRemaining / 3600).toString().padStart(2, '0');
+      const mins = Math.floor((timeRemaining % 3600) / 60).toString().padStart(2, '0');
       const secs = (timeRemaining % 60).toString().padStart(2, '0');
-      timerElement.textContent = `${mins}:${secs}`;
+      
+      // Voeg uren alleen toe aan de weergave als er een uur of meer over is, anders standaard MM:SS
+      if (Math.floor(timeRemaining / 3600) > 0) {
+        timerElement.textContent = `${hrs}:${mins}:${secs}`;
+      } else {
+        timerElement.textContent = `${mins}:${secs}`;
+      }
     }
 
     function startTimer() {
@@ -485,14 +487,26 @@
       clearInterval(timerInterval);
       isRunning = false;
       startBtn.textContent = 'Start';
-      const inputMins = parseInt(minutesInput.value) || 5;
-      totalTime = Math.max(1, inputMins) * 60;
+      
+      const inputHrs = parseInt(hoursInput.value) || 0;
+      const inputMins = parseInt(minutesInput.value) || 0;
+      
+      totalTime = (inputHrs * 3600) + (inputMins * 60);
+
+      // Beveiliging: als de velden samen op 0 staan, zet de timer standaard op minimaal 1 minuut
+      if (totalTime <= 0) {
+        totalTime = 60;
+        hoursInput.value = 0;
+        minutesInput.value = 1;
+      }
+
       timeRemaining = totalTime;
       updateTimerDisplay();
     }
 
     startBtn.addEventListener('click', startTimer);
     resetBtn.addEventListener('click', resetTimer);
+    hoursInput.addEventListener('change', resetTimer);
     minutesInput.addEventListener('change', resetTimer);
 
     // 4. Canvas Vallende Bladeren Animatie
@@ -589,7 +603,7 @@
       requestAnimationFrame(updateAnimation);
     }
 
-    updateTimerDisplay();
+    resetTimer(); // Start met de correcte displaywaarden
     updateAnimation();
   </script>
 </body>
