@@ -3,50 +3,215 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Café Geluiden</title>
+  <title>Café Achtergrondruis</title>
   <style>
-    body {
-      background-color: #f5f5dc; /* Beige achtergrond */
+    * {
+      box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: Arial, sans-serif;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+    }
+
+    body {
+      background-color: #e5cdb3;
+      background-image: radial-gradient(#eddcc9 15%, transparent 16%), radial-gradient(#e5cdb3 15%, transparent 16%);
+      background-size: 60px 60px;
+      font-family: 'Segoe UI', Georgia, serif;
       height: 100vh;
+      overflow: hidden;
+      position: relative;
+      color: #3d2314;
     }
 
-    #timer-container {
-      position: absolute;
-      top: 20px;
-      z-index: 10;
-      background: rgba(255, 255, 255, 0.7);
-      padding: 15px 25px;
-      border-radius: 10px;
-      text-align: center;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-
+    /* Canvas voor de vallende en opstapelende bladeren */
     #leaves-canvas {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      pointer-events: none; /* Klikken gaat door de animatie heen */
       z-index: 1;
+      pointer-events: none;
+    }
+
+    /* Centraal Timer Blok */
+    .timer-card {
+      position: absolute;
+      top: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      background: rgba(255, 248, 240, 0.55);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      padding: 20px 45px;
+      border-radius: 24px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(61, 35, 20, 0.08);
+    }
+
+    .timer-display {
+      font-size: 4.5rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .timer-label {
+      font-size: 1.1rem;
+      font-weight: 500;
+      opacity: 0.85;
+    }
+
+    .timer-subtext {
+      font-size: 0.85rem;
+      opacity: 0.65;
+      margin-top: 4px;
+    }
+
+    /* Geluidsspeler Paneel Links onderin */
+    .sound-panel {
+      position: absolute;
+      bottom: 40px;
+      left: 40px;
+      z-index: 10;
+      background: rgba(255, 248, 240, 0.55);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      padding: 24px;
+      border-radius: 24px;
+      width: 320px;
+      box-shadow: 0 10px 30px rgba(61, 35, 20, 0.08);
+    }
+
+    .sound-track {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .sound-track:last-child {
+      margin-bottom: 0;
+    }
+
+    .track-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+      font-size: 1rem;
+      width: 130px;
+    }
+
+    .track-icon {
+      font-size: 1.3rem;
+    }
+
+    .volume-slider {
+      flex-grow: 1;
+      margin: 0 12px;
+      accent-color: #8c4320;
+      cursor: pointer;
+    }
+
+    .play-btn {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: #3d2314;
+      transition: transform 0.1s ease;
+    }
+
+    .play-btn:active {
+      transform: scale(0.9);
+    }
+
+    /* Status Bar onderin rechts */
+    .status-bar {
+      position: absolute;
+      bottom: 25px;
+      right: 40px;
+      z-index: 10;
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Footer onderin midden */
+    .footer-info {
+      position: absolute;
+      bottom: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      background: rgba(255, 248, 240, 0.5);
+      padding: 8px 20px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      text-align: center;
+      opacity: 0.8;
     }
   </style>
 </head>
 <body>
 
-  <div id="timer-container">
-    <h2>Herfst Timer</h2>
-    <div id="timer" style="font-size: 2rem; font-weight: bold;">05:00</div>
+  <!-- Timer Card -->
+  <div class="timer-card">
+    <div class="timer-display" id="timer">05:00</div>
+    <div class="timer-label">Tijd over</div>
+    <div class="timer-subtext">Bladeren stapel voortgang</div>
   </div>
 
+  <!-- Sound Mixer -->
+  <div class="sound-panel">
+    <div class="sound-track">
+      <div class="track-info">
+        <span class="track-icon">👥</span>
+        <span>Geroezemoes</span>
+      </div>
+      <input type="range" class="volume-slider" min="0" max="100" value="70">
+      <button class="play-btn">⏸</button>
+    </div>
+
+    <div class="sound-track">
+      <div class="track-info">
+        <span class="track-icon">☕</span>
+        <span>Koffieapparaat</span>
+      </div>
+      <input type="range" class="volume-slider" min="0" max="100" value="40">
+      <button class="play-btn">▶</button>
+    </div>
+
+    <div class="sound-track">
+      <div class="track-info">
+        <span class="track-icon">🌧</span>
+        <span>Regen</span>
+      </div>
+      <input type="range" class="volume-slider" min="0" max="100" value="60">
+      <button class="play-btn">⏸</button>
+    </div>
+  </div>
+
+  <!-- Footer Info -->
+  <div class="footer-info">
+    Mijn Website: Live - Verbeterd door AI<br>
+    Achtergrond: Herfstbladeren Animatie
+  </div>
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span>Bladeren op stapel: <span id="leaf-count">0</span>%</span>
+    <span>🍂 Vol</span>
+    <input type="range" class="volume-slider" style="width: 80px;" min="0" max="100" value="100">
+  </div>
+
+  <!-- Canvas voor Animatie -->
   <canvas id="leaves-canvas"></canvas>
 
   <script>
@@ -61,37 +226,61 @@
       height = canvas.height = window.innerHeight;
     });
 
-    // Timer instellingen (bijv. 300 seconden = 5 minuten)
-    const TOTAL_TIME = 300; 
+    // 5 Minuten Timer (300 seconden)
+    const TOTAL_TIME = 300;
     let timeRemaining = TOTAL_TIME;
 
     const timerElement = document.getElementById('timer');
+    const leafCountElement = document.getElementById('leaf-count');
 
-    // Bladeren logica
+    // Bladeren & Kleuren
+    const leafColors = ['#d8572a', '#e88a1a', '#c0392b', '#f39c12', '#a04000', '#7e5109'];
     const leaves = [];
-    const MAX_LEAVES = 100;
-    let pileHeight = 0;
+    const MAX_LEAVES = 80;
 
     for (let i = 0; i < MAX_LEAVES; i++) {
       leaves.push({
         x: Math.random() * width,
         y: Math.random() * height - height,
-        size: Math.random() * 12 + 8,
+        size: Math.random() * 14 + 10,
         speedY: Math.random() * 1.5 + 0.8,
         speedX: Math.sin(Math.random() * Math.PI) * 1,
         angle: Math.random() * 360,
-        spin: (Math.random() - 0.5) * 2,
-        color: ['#d8572a', '#e88a1a', '#c0392b', '#f39c12'][Math.floor(Math.random() * 4)]
+        spin: (Math.random() - 0.5) * 2.5,
+        color: leafColors[Math.floor(Math.random() * leafColors.length)],
+        type: Math.floor(Math.random() * 2) // Verschillende blaadjesvormen
       });
     }
 
-    function drawLeaf(x, y, size, angle, color) {
+    // Vaste stapel bladeren onderin
+    const pileLeaves = [];
+    for (let i = 0; i < 300; i++) {
+      pileLeaves.push({
+        xRel: Math.random(), // Relatieve X positie (0 - 1)
+        yRel: Math.random(), // Relatieve hoogte binnen de stapel
+        size: Math.random() * 16 + 12,
+        angle: Math.random() * 360,
+        color: leafColors[Math.floor(Math.random() * leafColors.length)]
+      });
+    }
+
+    function drawLeaf(x, y, size, angle, color, type) {
       ctx.save();
       ctx.translate(x, y);
       ctx.rotate((angle * Math.PI) / 180);
       ctx.fillStyle = color;
       ctx.beginPath();
-      ctx.arc(0, 0, size, 0, Math.PI * 2);
+      
+      if (type === 1) {
+        // Eikenblad-achtige vorm
+        ctx.arc(0, 0, size / 2, 0, Math.PI * 2);
+        ctx.arc(size / 3, -size / 3, size / 3, 0, Math.PI * 2);
+        ctx.arc(-size / 3, -size / 3, size / 3, 0, Math.PI * 2);
+      } else {
+        // Standaard blad
+        ctx.ellipse(0, 0, size, size / 2, 0, 0, Math.PI * 2);
+      }
+      
       ctx.fill();
       ctx.restore();
     }
@@ -99,34 +288,41 @@
     function update() {
       ctx.clearRect(0, 0, width, height);
 
-      // Bereken hoe hoog de stapel moet zijn op basis van de timer
+      // Bereken de voortgang van de stapel (0% tot 100%)
       const progress = 1 - (timeRemaining / TOTAL_TIME);
-      pileHeight = progress * height;
+      const pileHeight = progress * (height * 0.45); // Maximaal 45% van het scherm gevuld
 
-      // Teken de opbouwende laag bladeren onderaan
-      ctx.fillStyle = '#c0392b';
-      ctx.fillRect(0, height - pileHeight, width, pileHeight);
+      leafCountElement.textContent = Math.round(progress * 100);
 
-      // Teken en verplaats vallende bladeren
+      // Teken de opgebouwde stapel onderin
+      if (pileHeight > 0) {
+        pileLeaves.forEach(pLeaf => {
+          const px = pLeaf.xRel * width;
+          const py = height - (pLeaf.yRel * pileHeight);
+          drawLeaf(px, py, pLeaf.size, pLeaf.angle, pLeaf.color, 0);
+        });
+      }
+
+      // Teken en verplaats de vallende bladeren
       leaves.forEach(leaf => {
         if (timeRemaining > 0) {
           leaf.y += leaf.speedY;
-          leaf.x += Math.sin(leaf.y / 30) * 1.5;
+          leaf.x += Math.sin(leaf.y / 25) * 1.2;
           leaf.angle += leaf.spin;
 
-          // Als blad de opgebouwde stapel raakt, opnieuw bovenaan beginnen
+          // Als het blad de opgebouwde stapel onderin raakt
           if (leaf.y >= height - pileHeight) {
             leaf.y = -20;
             leaf.x = Math.random() * width;
           }
         }
-        drawLeaf(leaf.x, leaf.y, leaf.size, leaf.angle, leaf.color);
+        drawLeaf(leaf.x, leaf.y, leaf.size, leaf.angle, leaf.color, leaf.type);
       });
 
       requestAnimationFrame(update);
     }
 
-    // Timer countdown
+    // Timer Aftellen
     const countdown = setInterval(() => {
       if (timeRemaining > 0) {
         timeRemaining--;
@@ -135,9 +331,16 @@
         timerElement.textContent = `${mins}:${secs}`;
       } else {
         clearInterval(countdown);
-        timerElement.textContent = "Tijd is om!";
+        timerElement.textContent = "00:00";
       }
     }, 1000);
+
+    // Speel/Pauze knoppen toggle
+    document.querySelectorAll('.play-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.textContent = btn.textContent === '⏸' ? '▶' : '⏸';
+      });
+    });
 
     update();
   </script>
