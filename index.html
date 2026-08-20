@@ -431,10 +431,10 @@
         </label>
       </div>
 
-      <div class="sound-track">
+      <div class="sound-track" data-id="barista" data-src="barista eli.mp3">
         <div class="track-header">
           <span>Barista 👤</span>
-          <button class="play-btn" onclick="togglePlay(this)">▶</button>
+          <button class="play-btn">▶</button>
         </div>
         <div class="controls-row">
           <span class="volume-icon">🔊</span>
@@ -447,10 +447,10 @@
         </div>
       </div>
 
-      <div class="sound-track">
+      <div class="sound-track" data-id="making_drinks" data-src="making drinks.mp3">
         <div class="track-header">
           <span>Preparing Drinks ☕</span>
-          <button class="play-btn" onclick="togglePlay(this)">▶</button>
+          <button class="play-btn">▶</button>
         </div>
         <div class="controls-row">
           <span class="volume-icon">🔊</span>
@@ -463,10 +463,10 @@
         </div>
       </div>
 
-      <div class="sound-track">
+      <div class="sound-track" data-id="coffeecups" data-src="coffeecups.mp3">
         <div class="track-header">
           <span>Coffee Cups 🍽</span>
-          <button class="play-btn" onclick="togglePlay(this)">▶</button>
+          <button class="play-btn">▶</button>
         </div>
         <div class="controls-row">
           <span class="volume-icon">🔊</span>
@@ -479,10 +479,10 @@
         </div>
       </div>
 
-      <div class="sound-track">
+      <div class="sound-track" data-id="interior" data-src="interior.mp3">
         <div class="track-header">
           <span>Other Customers 👥</span>
-          <button class="play-btn" onclick="togglePlay(this)">▶</button>
+          <button class="play-btn">▶</button>
         </div>
         <div class="controls-row">
           <span class="volume-icon">🔊</span>
@@ -495,10 +495,10 @@
         </div>
       </div>
 
-      <div class="sound-track">
+      <div class="sound-track" data-id="machinery" data-src="esspreso machine.mp3">
         <div class="track-header">
           <span>Machinery ⚙</span>
-          <button class="play-btn" onclick="togglePlay(this)">▶</button>
+          <button class="play-btn">▶</button>
         </div>
         <div class="controls-row">
           <span class="volume-icon">🔊</span>
@@ -511,10 +511,10 @@
         </div>
       </div>
 
-      <div class="sound-track">
+      <div class="sound-track" data-id="rain" data-src="rain.mp3">
         <div class="track-header">
           <span>Rainy Day 🌧</span>
-          <button class="play-btn" onclick="togglePlay(this)">▶</button>
+          <button class="play-btn">▶</button>
         </div>
         <div class="controls-row">
           <span class="volume-icon">🔊</span>
@@ -527,10 +527,10 @@
         </div>
       </div>
 
-      <div class="sound-track">
+      <div class="sound-track" data-id="sunny" data-src="sunny.mp3">
         <div class="track-header">
           <span>Sunny Day ☀️</span>
-          <button class="play-btn" onclick="togglePlay(this)">▶</button>
+          <button class="play-btn">▶</button>
         </div>
         <div class="controls-row">
           <span class="volume-icon">🔊</span>
@@ -543,10 +543,10 @@
         </div>
       </div>
 
-      <div class="sound-track">
+      <div class="sound-track" data-id="fireplace" data-src="fireplace.mp3">
         <div class="track-header">
           <span>Fireplace 🔥</span>
-          <button class="play-btn" onclick="togglePlay(this)">▶</button>
+          <button class="play-btn">▶</button>
         </div>
         <div class="controls-row">
           <span class="volume-icon">🔊</span>
@@ -584,10 +584,124 @@
   </div>
 
   <script>
-    // 1. Play / Pause knoppen toggle
-    function togglePlay(btn) {
-      btn.textContent = btn.textContent === '▶' ? '⏸' : '▶';
+    // 1. Web Audio API & Sound Tracks Control
+    let audioCtx = null;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
     }
+
+    const savePrefCheckbox = document.getElementById('save-pref');
+    const trackObjects = {};
+
+    // Restore preferences if saved
+    const savedPreferences = JSON.parse(localStorage.getItem('cafe_audio_prefs')) || {};
+    if (savedPreferences.savePref) {
+      savePrefCheckbox.checked = true;
+    }
+
+    document.querySelectorAll('.sound-track').forEach(trackEl => {
+      const id = trackEl.getAttribute('data-id');
+      const src = trackEl.getAttribute('data-src');
+      const playBtn = trackEl.querySelector('.play-btn');
+      const volSlider = trackEl.querySelector('.volume-slider');
+      const panSlider = trackEl.querySelector('.pan-slider');
+
+      const audio = new Audio(src);
+      audio.loop = true;
+
+      // Restore saved values if enabled
+      if (savedPreferences.savePref && savedPreferences.tracks && savedPreferences.tracks[id]) {
+        const pref = savedPreferences.tracks[id];
+        volSlider.value = pref.volume;
+        panSlider.value = pref.pan;
+      }
+
+      let sourceNode = null;
+      let gainNode = null;
+      let pannerNode = null;
+
+      function initNodes() {
+        if (sourceNode) return;
+        const ctx = getAudioContext();
+        sourceNode = ctx.createMediaElementSource(audio);
+        gainNode = ctx.createGain();
+        gainNode.gain.value = volSlider.value / 100;
+
+        if (ctx.createStereoPanner) {
+          pannerNode = ctx.createStereoPanner();
+          pannerNode.pan.value = parseFloat(panSlider.value);
+          sourceNode.connect(gainNode);
+          gainNode.connect(pannerNode);
+          pannerNode.connect(ctx.destination);
+        } else {
+          sourceNode.connect(gainNode);
+          gainNode.connect(ctx.destination);
+        }
+      }
+
+      playBtn.addEventListener('click', () => {
+        initNodes();
+        getAudioContext();
+
+        if (audio.paused) {
+          audio.play().then(() => {
+            playBtn.textContent = '⏸';
+            saveAudioPreferences();
+          }).catch(err => {
+            console.warn('Audio play error:', err);
+          });
+        } else {
+          audio.pause();
+          playBtn.textContent = '▶';
+          saveAudioPreferences();
+        }
+      });
+
+      volSlider.addEventListener('input', () => {
+        if (gainNode) {
+          gainNode.gain.value = volSlider.value / 100;
+        } else {
+          audio.volume = volSlider.value / 100;
+        }
+        saveAudioPreferences();
+      });
+
+      panSlider.addEventListener('input', () => {
+        if (pannerNode) {
+          pannerNode.pan.value = parseFloat(panSlider.value);
+        }
+        saveAudioPreferences();
+      });
+
+      trackObjects[id] = { audio, volSlider, panSlider, playBtn };
+    });
+
+    function saveAudioPreferences() {
+      if (!savePrefCheckbox.checked) {
+        localStorage.removeItem('cafe_audio_prefs');
+        return;
+      }
+      const prefs = {
+        savePref: true,
+        tracks: {}
+      };
+      Object.keys(trackObjects).forEach(id => {
+        prefs.tracks[id] = {
+          volume: trackObjects[id].volSlider.value,
+          pan: trackObjects[id].panSlider.value
+        };
+      });
+      localStorage.setItem('cafe_audio_prefs', JSON.stringify(prefs));
+    }
+
+    savePrefCheckbox.addEventListener('change', saveAudioPreferences);
 
     // 2. Pan Controls Toggle
     const panCheckbox = document.getElementById('toggle-pan');
